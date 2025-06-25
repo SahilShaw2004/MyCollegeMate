@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState, createContext } from 'react';
 import Sidebar from '../components/Sidebar';
 
+export const SidebarContext = createContext();
+
 function MainLayout({ children }) {
+  const [collapsed, setCollapsed] = useState(false);
   return (
-    <div className="min-h-screen flex font-poppins">
-      <Sidebar />
-      <main className="flex-1 ml-64 bg-gradient-to-br from-mint-100 via-blue-50 to-violet-50 p-4 overflow-y-auto">
-        {children}
-      </main>
-    </div>
+    <SidebarContext.Provider value={{ collapsed, setCollapsed }}>
+      <div className="min-h-screen flex font-poppins">
+        <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
+        <main className={`flex-1 bg-gradient-to-br from-mint-100 via-blue-50 to-violet-50 p-4 overflow-y-auto transition-all duration-300 ${collapsed ? 'ml-16' : 'ml-64'}`}>
+          {children}
+        </main>
+      </div>
+    </SidebarContext.Provider>
   );
 }
 

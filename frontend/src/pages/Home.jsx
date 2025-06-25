@@ -242,7 +242,7 @@ const Home = () => {
                                 className="flex items-center gap-4 bg-gradient-to-r from-blue-50 to-mint-50 rounded-lg p-3 border border-blue-100 shadow-sm hover:shadow-md transition"
                             >
                                 <span className={`rounded-full bg-white p-2 shadow ${date.color}`}>{date.icon}</span>
-                                <div>
+        <div>
                                     <div className="font-medium text-gray-900 text-sm">{date.label}</div>
                                     <div className="text-xs text-gray-500">{date.date}</div>
                                 </div>

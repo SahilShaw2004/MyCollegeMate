@@ -4,7 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Listbox, Transition, Menu, Dialog } from '@headlessui/react';
 import { CalendarIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 
-const allCourses = ['CS101', 'MATH202', 'CS201', 'PHYS101'];
+// const allCourses = ['CS101', 'MATH202', 'CS201', 'PHYS101'];
 const allLocations = ['Library', 'Cafe', 'Lab', 'Study Hall', 'Outdoor'];
 const allStyles = ['Visual learner', 'Problem-solving', 'Group discussions', 'Quiet environment'];
 const allDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Weekend'];
