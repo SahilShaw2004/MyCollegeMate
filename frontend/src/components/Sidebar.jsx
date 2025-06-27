@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { HomeIcon, RocketLaunchIcon, BuildingLibraryIcon, CalendarDaysIcon, ExclamationTriangleIcon, UsersIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import { motion,AnimatePresence } from 'framer-motion';
+import { HomeIcon, RocketLaunchIcon, BuildingLibraryIcon, CalendarDaysIcon, ExclamationTriangleIcon, UsersIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+// eslint-disable-next-line no-unused-vars
+import { motion, AnimatePresence } from 'framer-motion';
 
 const navItems = [
   {
@@ -50,39 +51,45 @@ const navItems = [
   },
 ];
 
-function Sidebar() {
+function Sidebar({ collapsed, setCollapsed }) {
   const location = useLocation();
   const [openDropdown, setOpenDropdown] = useState(null);
 
   const handleDropdown = (label) => {
-    setOpenDropdown(openDropdown === label ? null : label);
+    if (!collapsed) {
+      setOpenDropdown(openDropdown === label ? null : label);
+    }
   };
 
   return (
-    <aside className="fixed top-0 left-0 h-screen w-64 bg-[#0f0f0f] flex flex-col shadow-lg z-40">
+    <aside className={`fixed top-0 left-0 h-screen bg-[#0f0f0f] flex flex-col shadow-lg z-40 transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
       <div className="flex items-center justify-center h-20 border-b border-gray-800">
-        <span className="text-2xl font-bold text-white tracking-wide font-poppins">MyCollegeMate</span>
+        {!collapsed && <span className="text-2xl font-bold text-white tracking-wide font-poppins">MyCollegeMate</span>}
+        {collapsed && <span className="text-2xl font-bold text-white font-poppins">M</span>}
       </div>
-      <nav className="flex-1 py-6 px-4 space-y-2">
+      <nav className={`flex-1 py-6 ${collapsed ? 'px-1' : 'px-4'} space-y-2`}>
         {navItems.map((item) => (
           <div key={item.label}>
             {item.children ? (
               <div>
                 <button
-                  className={`flex items-center w-full px-3 py-2 rounded-lg text-gray-200 hover:bg-gray-800 transition group ${openDropdown === item.label ? 'bg-gray-800' : ''}`}
+                  className={`flex items-center w-full ${collapsed ? 'justify-center' : ''} px-3 py-2 rounded-lg text-gray-200 hover:bg-gray-800 transition group ${openDropdown === item.label ? 'bg-gray-800' : ''}`}
                   onClick={() => handleDropdown(item.label)}
+                  disabled={collapsed}
                 >
-                  <span className="mr-3">{item.icon}</span>
-                  <span className="flex-1 text-left font-medium">{item.label}</span>
-                  <motion.span
-                    animate={{ rotate: openDropdown === item.label ? 180 : 0 }}
-                    className="ml-2"
-                  >
-                    <ChevronDownIcon className="w-5 h-5 transition-transform" />
-                  </motion.span>
+                  <span className="mr-3 ml-3 flex items-center justify-center">{item.icon}</span>
+                  {!collapsed && <span className="flex-1 text-left font-medium">{item.label}</span>}
+                  {!collapsed && (
+                    <motion.span
+                      animate={{ rotate: openDropdown === item.label ? 180 : 0 }}
+                      className="ml-2"
+                    >
+                      <ChevronDownIcon className="w-5 h-5 transition-transform" />
+                    </motion.span>
+                  )}
                 </button>
                 <AnimatePresence initial={false}>
-                  {openDropdown === item.label && (
+                  {!collapsed && openDropdown === item.label && (
                     <motion.div
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
@@ -106,20 +113,28 @@ function Sidebar() {
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center px-3 py-2 rounded-lg text-gray-200 hover:bg-gray-800 transition font-medium ${
-                    isActive || location.pathname === item.to
-                      ? 'text-white bg-gray-800'
-                      : ''
+                  `flex items-center ${collapsed ? 'justify-center' : ''} px-3 py-2 rounded-lg text-gray-200 hover:bg-gray-800 transition font-medium ${isActive || location.pathname === item.to
+                    ? 'text-white bg-gray-800'
+                    : ''
                   }`
                 }
               >
-                <span className="mr-3">{item.icon}</span>
-                {item.label}
+                <span className="mr-3 ml-3 flex items-center justify-center">{item.icon}</span>
+                {!collapsed && item.label}
               </NavLink>
             )}
           </div>
         ))}
       </nav>
+      <div className="flex items-center justify-center h-16 border-t border-gray-800">
+        <button
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-800 hover:bg-gray-700 text-gray-200 transition"
+          onClick={() => setCollapsed((prev) => !prev)}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? <ChevronRightIcon className="w-6 h-6" /> : <ChevronLeftIcon className="w-6 h-6" />}
+        </button>
+      </div>
     </aside>
   );
 }
