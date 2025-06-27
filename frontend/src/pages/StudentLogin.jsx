@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const StudentLogin = () => {
     const [studentId, setStudentId] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -15,7 +19,8 @@ const StudentLogin = () => {
         }
         try {
             // Example: await loginStudent(studentId, password);
-            alert('Login successful!');
+            login();
+            navigate('/');
         } catch (err) {
             setError('Invalid Student ID or Password.');
         }

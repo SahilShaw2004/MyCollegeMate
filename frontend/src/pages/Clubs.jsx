@@ -978,7 +978,7 @@ function ClubEventsPage() {
       {/* Main Content with blur when modal is open */}
       <div className={`relative flex-1 flex transition-all duration-300 ${isDialogOpen || isRegisterOpen ? 'filter blur-sm' : ''}`}>
         {/* Main Content */}
-        <main className={`flex-1 py-8 px-4 md:px-4 transition-all duration-300 ${collapsed ? '' : ''} mr-80`}>
+        <div className={`flex-1 py-8 px-4 md:px-4 transition-all w-[60%] duration-300 ${collapsed ? '' : ''} mr-80`}>
           <ClubsBreadcrumb />
           {/* Main Content Top Section: Filter/Search Bar */}
           <div className="mb-6 flex flex-col md:flex-row md:items-center gap-y-2 gap-x-3 p-0">
@@ -1140,7 +1140,7 @@ function ClubEventsPage() {
               </div>
             ))}
           </div>
-        </main>
+        </div>
 
 
         {/* Sidebar: fixed at right-0, outside main content */}
