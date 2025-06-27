@@ -16,7 +16,7 @@ const FacultyLogin = () => {
         try {
             // Example: await loginFaculty(facultyId, password);
             alert('Login successful (mock)');
-        } catch (err) {
+        } catch {
             setError('Invalid Faculty ID or Password.');
         }
     };

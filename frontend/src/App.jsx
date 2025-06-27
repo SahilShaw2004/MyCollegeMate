@@ -1,5 +1,5 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./layout/MainLayout";
 import Home from "./pages/Home.jsx";
 import Start from "./pages/Start.jsx";
@@ -17,34 +17,110 @@ import StudentLogin from "./pages/StudentLogin.jsx";
 import StudentSignup from "./pages/StudentSignup.jsx";
 import StudyMaterial from "./pages/StudyMaterial.jsx";
 import StudyPartner from "./pages/StudyPartner.jsx";
+import ProtectedRoute from "./ProtectedRoute";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+
+function AppRoutes() {
+  const { isLoggedIn } = useAuth();
+  return (
+    <Routes>
+      {/* Landing page for not logged in users */}
+      <Route path="/start" element={isLoggedIn ? <Navigate to="/" /> : <Start />} />
+      {/* Auth pages */}
+      <Route path="/student-login" element={<StudentLogin />} />
+      <Route path="/student-signup" element={<StudentSignup />} />
+      <Route path="/faculty-login" element={<FacultyLogin />} />
+      <Route path="/faculty-signup" element={<FacultySignup />} />
+      {/* Protected routes */}
+      <Route path="/" element={
+        <ProtectedRoute>
+          <MainLayout><Home /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/clubs" element={
+        <ProtectedRoute>
+          <MainLayout><Clubs /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/clubs/join" element={
+        <ProtectedRoute>
+          <MainLayout><Clubs /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/clubs/events" element={
+        <ProtectedRoute>
+          <MainLayout><Clubs /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/events" element={
+        <ProtectedRoute>
+          <MainLayout><Events /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/events/registrations" element={
+        <ProtectedRoute>
+          <MainLayout><Events /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/gallery" element={
+        <ProtectedRoute>
+          <MainLayout><Gallery /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/leaderboard" element={
+        <ProtectedRoute>
+          <MainLayout><Leaderboard /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/lostandfound" element={
+        <ProtectedRoute>
+          <MainLayout><LostandFound /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/memepage" element={
+        <ProtectedRoute>
+          <MainLayout><MemePage /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/ragging" element={
+        <ProtectedRoute>
+          <MainLayout><Ragging /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/ragging/history" element={
+        <ProtectedRoute>
+          <MainLayout><RaggingHistoryPage /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/studymaterial" element={
+        <ProtectedRoute>
+          <MainLayout><StudyMaterial /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/studypartner" element={
+        <ProtectedRoute>
+          <MainLayout><StudyPartner /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/studypartner/groups" element={
+        <ProtectedRoute>
+          <MainLayout><StudyPartner /></MainLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/studypartner/join" element={
+        <ProtectedRoute>
+          <MainLayout><StudyPartner /></MainLayout>
+        </ProtectedRoute>
+      } />
+    </Routes>
+  );
+}
 
 function App() {
   return (
-    <MainLayout>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/start" element={<Start />} />
-        <Route path="/clubs" element={<Clubs />} />
-        <Route path="/clubs/join" element={<Clubs />} />
-        <Route path="/clubs/events" element={<Clubs />} />
-        <Route path="/events" element={<Events />} />
-        <Route path="/events/registrations" element={<Events />} />
-        <Route path="/faculty-login" element={<FacultyLogin />} />
-        <Route path="/faculty-signup" element={<FacultySignup />} />
-        <Route path="/gallery" element={<Gallery />} />
-        <Route path="/leaderboard" element={<Leaderboard />} />
-        <Route path="/lostandfound" element={<LostandFound />} />
-        <Route path="/memepage" element={<MemePage />} />
-        <Route path="/ragging" element={<Ragging />} />
-        <Route path="/ragging/history" element={<RaggingHistoryPage />} />
-        <Route path="/student-login" element={<StudentLogin />} />
-        <Route path="/student-signup" element={<StudentSignup />} />
-        <Route path="/studymaterial" element={<StudyMaterial />} />
-        <Route path="/studypartner" element={<StudyPartner />} />
-        <Route path="/studypartner/groups" element={<StudyPartner />} />
-        <Route path="/studypartner/join" element={<StudyPartner />} />
-      </Routes>
-    </MainLayout>
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }
 

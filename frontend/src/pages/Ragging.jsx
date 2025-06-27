@@ -37,10 +37,10 @@ const RaggingReport = () => {
                     <li className="text-gray-700 font-semibold">Report Incident</li>
                 </ol>
             </nav>
-            <button className="mb-4 flex items-center gap-2 text-sm text-gray-500 hover:underline">
+            {/* <button className="mb-4 flex items-center gap-2 text-sm text-gray-500 hover:underline">
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
                 Back to Dashboard
-            </button>
+            </button> */}
             <div className="flex items-center gap-3 mb-2">
                 <ExclamationTriangleIcon className="w-7 h-7 text-red-500" />
                 <h1 className="text-2xl font-bold text-gray-900 font-poppins">Report Ragging Incident</h1>
@@ -402,10 +402,10 @@ export function RaggingHistoryPage() {
                     <li className="text-gray-700 font-semibold">Report History</li>
                 </ol>
             </nav>
-            <button className="mb-4 flex items-center gap-2 text-sm text-gray-500 hover:underline">
+            {/* <button className="mb-4 flex items-center gap-2 text-sm text-gray-500 hover:underline">
                 <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
                 Back to Dashboard
-            </button>
+            </button> */}
             <div className="flex items-center gap-3 mb-2">
                 <DocumentTextIcon className="w-7 h-7 text-purple-500" />
                 <h1 className="text-2xl font-bold text-gray-900 font-poppins">Report History</h1>
