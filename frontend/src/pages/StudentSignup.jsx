@@ -12,17 +12,30 @@ const StudentSignup = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        // TODO: Replace with your actual signup logic/API call
         if (studentId === '' || password === '') {
             setError('Please enter both Student ID and Password.');
             return;
         }
         try {
-            // Example: await signupStudent(studentId, password);
-            login();
-            navigate('/');
+            const response = await fetch('http://localhost:3000/api/v1/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: studentId,
+                    password: password,
+                }),
+            });
+            const data = await response.json();
+            if (data.success) {
+                login(); // Optionally pass user data if your context supports it
+                navigate('/');
+            } else {
+                setError(data.message || 'Signup failed.');
+            }
         } catch (err) {
-            setError('Signup failed.');
+            setError('Signup failed. Please try again.');
         }
     };
 
