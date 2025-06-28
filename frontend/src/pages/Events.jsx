@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CalendarDaysIcon, MapPinIcon, ClockIcon, MagnifyingGlassIcon, Squares2X2Icon, CalendarIcon, SparklesIcon, ChevronLeftIcon, ChevronRightIcon, HeartIcon as HeartOutlineIcon, ShareIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 // eslint-disable-next-line no-unused-vars
@@ -22,87 +22,36 @@ const locations = ['All Locations', 'Innovation Center', 'Main Auditorium', 'Cam
 const sortOptions = ['Date (Newest)', 'Date (Oldest)', 'Most Popular', 'A-Z', 'Z-A'];
 const quickFilters = ['Today', 'This Week', 'This Month', 'Academic', 'Social', 'Sports', 'Cultural'];
 
-const mockEvents = [
-  {
-    id: 1,
-    club: 'Tech Society',
-    clubShort: 'TS',
-    title: 'Tech Talk: AI Revolution',
-    description: 'A deep dive into the future of AI and its impact on society.',
-    date: '2025-06-25',
-    time: '3:00 PM - 5:00 PM',
-    location: 'Engineering Building, Room 305',
-    category: 'Technology',
-    icon: <SparklesIcon className="w-8 h-8 text-green-500" />, // Example icon
-  },
-  {
-    id: 2,
-    club: 'Debate Club',
-    clubShort: 'DC',
-    title: 'Annual Debate Competition',
-    description: 'Compete with the best debaters on campus.',
-    date: '2025-06-28',
-    time: '1:00 PM - 4:00 PM',
-    location: 'Arts Center Auditorium',
-    category: 'Academic',
-    icon: <SparklesIcon className="w-8 h-8 text-blue-500" />, // Example icon
-  },
-  {
-    id: 3,
-    club: 'Music Society',
-    clubShort: 'MS',
-    title: 'Summer Music Festival',
-    description: 'Enjoy performances by student bands and artists.',
-    date: '2025-07-05',
-    time: '5:00 PM - 10:00 PM',
-    location: 'Campus Green',
-    category: 'Entertainment',
-    icon: <SparklesIcon className="w-8 h-8 text-yellow-500" />, // Example icon
-  },
-  {
-    id: 4,
-    club: 'Business Club',
-    clubShort: 'BC',
-    title: 'Entrepreneurship Workshop',
-    description: 'Learn how to launch your own startup.',
-    date: '2025-07-10',
-    time: '2:00 PM - 5:00 PM',
-    location: 'Business School, Room 120',
-    category: 'Career',
-    icon: <SparklesIcon className="w-8 h-8 text-violet-500" />, // Example icon
-  },
-  {
-    id: 5,
-    club: 'Photography Club',
-    clubShort: 'PC',
-    title: 'Photography Exhibition',
-    description: 'Showcase your best campus moments.',
-    date: '2025-07-15',
-    time: '11:00 AM - 6:00 PM',
-    location: 'Student Center Gallery',
-    category: 'Arts',
-    icon: <SparklesIcon className="w-8 h-8 text-blue-400" />, // Example icon
-  },
-  {
-    id: 6,
-    club: 'Community Service Club',
-    clubShort: 'CSC',
-    title: 'Charity Run',
-    description: 'Join the run for a good cause!',
-    date: '2025-07-20',
-    time: '8:00 AM - 11:00 AM',
-    location: 'Campus Track',
-    category: 'Sports',
-    icon: <SparklesIcon className="w-8 h-8 text-green-400" />, // Example icon
-  },
-].map((event, idx) => ({
-  ...event,
-  image: eventImages[idx % eventImages.length],
-  registration: {
-    current: 100 + idx * 50,
-    max: 200 + idx * 100,
-  },
-}));
+// Mock club data - you might want to fetch this from an API as well
+const mockClubs = {
+  1: { name: 'Tech Society', short: 'TS' },
+  2: { name: 'Debate Club', short: 'DC' },
+  3: { name: 'Music Society', short: 'MS' },
+  4: { name: 'Business Club', short: 'BC' },
+  5: { name: 'Photography Club', short: 'PC' },
+  6: { name: 'Community Service Club', short: 'CSC' },
+};
+
+// Mock venue data - you might want to fetch this from an API as well
+const mockVenues = {
+  1: 'Main Auditorium',
+  2: 'Engineering Building, Room 305',
+  3: 'Arts Center Auditorium',
+  4: 'Campus Green',
+  5: 'Business School, Room 120',
+  6: 'Student Center Gallery',
+  7: 'Campus Track',
+};
+
+// Mock categories - you might want to fetch this from an API as well
+const mockCategories = {
+  1: 'Technology',
+  2: 'Academic',
+  3: 'Entertainment',
+  4: 'Career',
+  5: 'Arts',
+  6: 'Sports',
+};
 
 const categories = ['All Categories', 'Technology', 'Academic', 'Entertainment', 'Career', 'Arts', 'Sports'];
 
@@ -178,6 +127,63 @@ const Events = () => {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Fetch events from API
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:4000/api/v1/event');
+        const result = await response.json();
+        
+        if (result.success) {
+          // Transform API data to match component expectations
+          const transformedEvents = result.data.map((event, idx) => {
+            const startDate = new Date(event.startingTime);
+            const endDate = new Date(event.endingTime);
+            const club = mockClubs[event.clubId] || { name: 'Unknown Club', short: 'UC' };
+            const venue = mockVenues[event.venueId] || 'Unknown Venue';
+            const category = mockCategories[event.clubId] || 'General';
+            
+            return {
+              id: event.id,
+              club: club.name,
+              clubShort: club.short,
+              title: event.name,
+              description: `${event.name} - Join us for an exciting event!`, // You might want to add description field to your API
+              date: startDate.toISOString().split('T')[0],
+              time: `${startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })} - ${endDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`,
+              location: venue,
+              category: category,
+              icon: <SparklesIcon className="w-8 h-8 text-green-500" />,
+              image: eventImages[idx % eventImages.length],
+              registration: {
+                current: event.registration_count,
+                max: event.total_seats,
+              },
+              price: event.price,
+              permission: event.permission,
+              startingTime: event.startingTime,
+              endingTime: event.endingTime,
+            };
+          });
+          
+          setEvents(transformedEvents);
+        } else {
+          setError('Failed to fetch events');
+        }
+      } catch (err) {
+        setError('Error fetching events: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
 
   // Helper for week filter
   function isThisWeek(dateStr) {
@@ -190,13 +196,15 @@ const Events = () => {
     d.setHours(0, 0, 0, 0);
     return d >= start && d <= end;
   }
+  
   function isThisMonth(dateStr) {
     const now = new Date();
     const d = new Date(dateStr);
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   }
+  
   // Filter logic (add location and quick filter logic)
-  let filteredEvents = mockEvents.filter(event => {
+  let filteredEvents = events.filter(event => {
     const categoryMatch = selectedCategory === 'All Categories' || event.category === selectedCategory;
     const locationMatch = selectedLocation === 'All Locations' || event.location === selectedLocation;
     const searchMatch = event.title.toLowerCase().includes(search.toLowerCase()) || event.description.toLowerCase().includes(search.toLowerCase()) || event.location.toLowerCase().includes(search.toLowerCase());
@@ -208,6 +216,7 @@ const Events = () => {
     else if (["Academic", "Social", "Sports", "Cultural"].includes(activeQuick)) quickMatch = event.category === activeQuick;
     return categoryMatch && locationMatch && searchMatch && dateMatch && quickMatch;
   });
+  
   // Sort logic
   if (selectedSort === 'Date (Newest)') {
     filteredEvents = filteredEvents.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -217,7 +226,7 @@ const Events = () => {
 
   // Calendar event mapping
   const eventsByDate = {};
-  mockEvents.forEach(event => {
+  events.forEach(event => {
     const [y, m, d] = event.date.split('-').map(Number);
     if (y === calendarYear && m === calendarMonth + 1) {
       if (!eventsByDate[d]) eventsByDate[d] = [];
@@ -226,22 +235,6 @@ const Events = () => {
   });
 
   const monthMatrix = getMonthMatrix(calendarYear, calendarMonth);
-
-  // Add to Calendar handler
-  // function handleAddToCalendar(event) {
-  //   const icsContent = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${event.title}\nDESCRIPTION:${event.description}\nLOCATION:${event.location}\nDTSTART:${event.date.replace(/-/g, '')}T${event.time.split(' - ')[0].replace(/:/g, '')}00\nDTEND:${event.date.replace(/-/g, '')}T${event.time.split(' - ')[1]?.replace(/:/g, '') || ''}00\nEND:VEVENT\nEND:VCALENDAR`;
-  //   const blob = new Blob([icsContent], { type: 'text/calendar' });
-  //   const url = URL.createObjectURL(blob);
-  //   const a = document.createElement('a');
-  //   a.href = url;
-  //   a.download = `${event.title.replace(/\s+/g, '_')}.ics`;
-  //   document.body.appendChild(a);
-  //   a.click();
-  //   setTimeout(() => {
-  //     document.body.removeChild(a);
-  //     URL.revokeObjectURL(url);
-  //   }, 100);
-  // }
 
   function EventRegisterModal({ event, open, onClose, onSuccess }) {
     const [reminder, setReminder] = useState([]);
@@ -334,6 +327,36 @@ const Events = () => {
   const location = useLocation();
   if (location.pathname === '/events/registrations') {
     return <MyRegistrationsPage />;
+  }
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading events...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-4xl mb-4">⚠️</div>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
