@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { MagnifyingGlassIcon, ChevronDownIcon, Squares2X2Icon, Bars3Icon, UsersIcon, ClockIcon, CalendarDaysIcon, MapPinIcon, XMarkIcon, PlusIcon, CheckCircleIcon, MinusCircleIcon, StarIcon, TagIcon, ArrowRightOnRectangleIcon, CodeBracketIcon, ChatBubbleLeftRightIcon, CameraIcon, TrophyIcon, GlobeAltIcon, SparklesIcon, ArrowRightIcon, EyeIcon, ShareIcon } from '@heroicons/react/24/outline';
 import { useLocation, Link } from 'react-router-dom';
 import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar';
@@ -325,8 +325,43 @@ function Clubs() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All Categories');
   const [view, setView] = useState('grid');
+  const [clubs, setClubs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredClubs = mockClubs.filter(
+  // Fetch clubs from API
+  useEffect(() => {
+    async function fetchClubs() {
+      setLoading(true);
+      try {
+        const res = await fetch('http://localhost:4000/api/v1/club');
+        const json = await res.json();
+        if (json.success && Array.isArray(json.data)) {
+          // Map API data to expected frontend structure
+          setClubs(json.data.map(club => ({
+            id: club.id,
+            name: club.name,
+            category: 'General', // API does not provide category, so use a default or map if available
+            role: '', // Set as needed
+            status: 'Active', // Set as needed
+            description: '', // Set as needed
+            image: 'https://placehold.co/400x200?text=Club', // Placeholder image
+            schedule: '',
+            location: '',
+            members: 0,
+            lastActive: '',
+          })));
+        } else {
+          setClubs([]);
+        }
+      } catch {
+        setClubs([]);
+      }
+      setLoading(false);
+    }
+    fetchClubs();
+  }, []);
+
+  const filteredClubs = clubs.filter(
     c => (category === 'All Categories' || c.category === category) &&
       c.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -378,7 +413,9 @@ function Clubs() {
               </button>
             </div>
           </div>
-          <div className="mb-4 text-gray-700 text-sm font-medium">Showing {filteredClubs.length} clubs</div>
+          <div className="mb-4 text-gray-700 text-sm font-medium">
+            {loading ? 'Loading clubs...' : `Showing ${filteredClubs.length} clubs`}
+          </div>
           {/* Clubs Grid */}
           <div className={`grid ${view === 'grid' ? 'grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-6'}`}>
             {filteredClubs.map(club => (
@@ -475,6 +512,7 @@ function JoinClubPage() {
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [memberCountFilter, setMemberCountFilter] = useState([0, 100]);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [loading] = useState(false); // <-- Add this line
   const categoryDropdownRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -744,28 +782,32 @@ function JoinClubPage() {
               </button>
             </div>
           </div>
-          <div className="mb-4 text-gray-700 text-sm font-medium">Showing {filteredClubs.length} clubs that you can join</div>
+          <div className="mb-4 text-gray-700 text-sm font-medium">
+            {loading ? 'Loading clubs...' : `Showing ${filteredClubs.length} clubs`}
+          </div>
           {/* Clubs Grid */}
-          <div className={`${viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-6'}`}>
+          <div className={`grid ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-6'}`}>
             {filteredClubs.map(club => (
-              <JoinClubCard key={club.id} club={club} direction={viewMode === 'grid' ? 'col' : 'row'} />
+              <ClubCard key={club.id} club={club} direction={viewMode === 'grid' ? 'col' : 'row'} />
             ))}
           </div>
         </main>
         {/* Sidebar: fixed at right-0, outside main content */}
         <aside className="hidden lg:block fixed top-0 pt-1 p-4 right-0 w-[320px] h-screen bg-white shadow-lg border-l border-gray-200 z-30 overflow-y-scroll scrollbar-none overscroll-none">
-          <div className="sticky top-8">
-            {/* Featured Clubs */}
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Featured Clubs</h2>
-            <div className="space-y-4 mb-2">
+          <div className="sticky top-24">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">Featured Clubs</h2>
+            <div className="space-y-4 mb-6">
               {featuredClubs.map(club => (
-                <div key={club.id} className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full border-2 border-white shadow-sm overflow-hidden">
-                    <img src={club.logo} alt={club.name} className="h-full w-full object-cover" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-gray-900 text-sm">{club.name}</h3>
-                    <div className="flex items-center gap-2 mt-1">
+                <div key={club.id} className="flex gap-3 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                  <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
+                    <AvatarImage src={club.logo} alt={club.name} />
+                    <AvatarFallback className="bg-purple-100 text-purple-600">
+                      {club.name.substring(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 flex flex-col">
+                    <h3 className="font-semibold text-gray-900 text-sm leading-tight mb-1">{club.name}</h3>
+                    <div className="flex items-center gap-2 mb-1">
                       <span className="bg-gray-100 text-gray-700 text-xs rounded px-2 py-0.5 font-semibold">{club.category}</span>
                       <span className="text-xs text-gray-500">{club.memberCount} members</span>
                     </div>
@@ -793,13 +835,13 @@ function JoinClubPage() {
             {/* Popular Categories */}
             <h3 className="text-md font-semibold text-gray-900 mb-3">Popular Categories</h3>
             <div className="flex flex-wrap gap-2 mb-2">
-              {clubCategories.filter(cat => cat !== 'All').map(category => (
+              {clubCategories.filter(cat => cat !== 'All').map(categoryOption => (
                 <button
-                  key={category}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold border ${categoryFilter === category ? 'bg-purple-600 text-white' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
-                  onClick={() => setCategoryFilter(categoryFilter === category ? 'All' : category)}
+                  key={categoryOption}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${categoryFilter === categoryOption ? 'bg-purple-600 text-white border-purple-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`}
+                  onClick={() => setCategoryFilter(categoryFilter === categoryOption ? 'All' : categoryOption)}
                 >
-                  {category}
+                  {categoryOption}
                 </button>
               ))}
             </div>
@@ -860,6 +902,119 @@ function JoinClubPage() {
           </span>
         </div>
       </footer>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden">
+          {selectedEvent && (
+            <div className="bg-white h-[93vh] rounded-lg overflow-hidden relative">
+              {!isRegisterOpen ? (
+                <>
+                  <DialogHeader className="p-6 pb-2">
+                    <div className="flex items-center gap-3">
+                      <Badge className="bg-purple-100 text-purple-700 text-xs px-3 py-1 rounded-full font-semibold shadow-sm">{selectedEvent.category}</Badge>
+                      <span className="text-xs text-gray-500">Organized by {selectedEvent.club}</span>
+                    </div>
+                    <DialogTitle className="text-2xl font-bold text-gray-900 mb-2">{selectedEvent.name}</DialogTitle>
+                  </DialogHeader>
+                  <img src={selectedEvent.image} alt={selectedEvent.name} className="w-full h-56 object-cover object-center" />
+                  <div className="p-6 pt-2 pb-2">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
+                        <AvatarImage src={selectedEvent.clubLogo} alt={selectedEvent.club} />
+                        <AvatarFallback className="bg-purple-100 text-purple-600">
+                          {selectedEvent.club.substring(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="text-sm text-gray-500 font-medium">About this event</div>
+                        <DialogDescription className="text-gray-700 text-base mt-1">{selectedEvent.description}</DialogDescription>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-3">
+                      <div>
+                        <div className="mb-2 font-semibold text-gray-900">Event Details</div>
+                        <div className="flex items-center gap-2 text-sm mb-1"><CalendarDaysIcon className="w-4 h-4 text-gray-400" /> {selectedEvent.date}</div>
+                        <div className="flex items-center gap-2 text-sm mb-1"><ClockIcon className="w-4 h-4 text-gray-400" /> {selectedEvent.time}</div>
+                        <div className="flex items-center gap-2 text-sm"><MapPinIcon className="w-4 h-4 text-gray-400" /> {selectedEvent.location}</div>
+                      </div>
+                      <div>
+                        <div className="mb-2 font-semibold text-gray-900">Attendance</div>
+                        <div className="mb-1 text-sm text-gray-700">Capacity</div>
+                        <Progress value={Math.round((selectedEvent.attendees / selectedEvent.maxCapacity) * 100)} className="h-2 bg-gray-200" />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>{selectedEvent.attendees}/{selectedEvent.maxCapacity}</span>
+                          <span>{selectedEvent.maxCapacity - selectedEvent.attendees} spots remaining</span>
+                        </div>
+                        <div className="mt-4 text-sm text-gray-700">Organized by</div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Avatar className="h-7 w-7 border-2 border-white shadow-sm">
+                            <AvatarImage src={selectedEvent.clubLogo} alt={selectedEvent.club} />
+                            <AvatarFallback className="bg-purple-100 text-purple-600">{selectedEvent.club.substring(0, 2)}</AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm font-medium text-gray-900">{selectedEvent.club}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter className="flex justify-between items-center p-6 pt-1.5 pb-1.5 border-t">
+                    <div className="relative">
+                      <Button variant="outline" className="flex items-center gap-2" onClick={handleShare}>
+                        <ShareIcon className="w-5 h-5" /> Share
+                      </Button>
+                      {shareTooltip && (
+                        <span className="absolute left-1/2 -translate-x-1/2 mt-2 px-2 py-1 bg-black text-white text-xs rounded shadow z-10 whitespace-nowrap">{shareTooltip}</span>
+                      )}
+                    </div>
+                    <Button
+                      className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-md font-semibold flex items-center gap-2"
+                      onClick={() => setIsRegisterOpen(true)}
+                    >
+                      <UsersIcon className="w-5 h-5" /> Register
+                    </Button>
+                  </DialogFooter>
+                </>
+              ) : (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-white bg-opacity-95">
+                  <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative">
+                    {/* Close button */}
+                    <button
+                      className="absolute top-3 right-3 text-gray-400 hover:text-gray-700"
+                      onClick={() => setIsRegisterOpen(false)}
+                    >
+                      <XMarkIcon className="w-6 h-6" />
+                    </button>
+                    {/* Registration Form */}
+                    <h2 className="text-2xl font-bold mb-2 text-center">Register for Event</h2>
+                    <p className="text-gray-600 text-center mb-4">Complete the form below to register for this event.</p>
+                    <div className="bg-purple-50 rounded-lg p-3 mb-4 flex items-center gap-3">
+                      <img src={selectedEvent?.clubLogo} alt="" className="w-10 h-10 rounded-full" />
+                      <div>
+                        <div className="font-semibold">{selectedEvent?.name}</div>
+                        <div className="text-xs text-gray-500">{selectedEvent?.date} • {selectedEvent?.time}</div>
+                      </div>
+                    </div>
+                    <form>
+                      <label className="block mb-2 font-medium">Full Name</label>
+                      <input className="w-full mb-3 px-3 py-2 border rounded" placeholder="John Smith" />
+                      <label className="block mb-2 font-medium">Email Address</label>
+                      <input className="w-full mb-3 px-3 py-2 border rounded" placeholder="john.smith@example.com" />
+                      <label className="block mb-2 font-medium">Phone Number (optional)</label>
+                      <input className="w-full mb-3 px-3 py-2 border rounded" placeholder="(123) 456-7890" />
+                      <div className="flex items-center mb-4">
+                        <input type="checkbox" className="mr-2" />
+                        <span className="text-xs text-gray-600">I agree to receive communications about this event and understand the attendance policy.</span>
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <button type="button" className="px-4 py-2 rounded bg-gray-200" onClick={() => setIsRegisterOpen(false)}>Cancel</button>
+                        <button type="submit" className="px-4 py-2 rounded bg-purple-600 text-white font-semibold">Complete Registration</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
